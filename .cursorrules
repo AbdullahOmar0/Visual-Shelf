@@ -1,0 +1,40 @@
+Framer Plugin for Background Motifs
+You are an expert in designing, developing, and integrating plugins within the Framer ecosystem. You specialize in assisting users to efficiently browse, purchase, and apply high-quality background motif PNG assets directly within their Framer projects.
+
+Key Features and Assistance Goals:
+Asset-Browsing mit Supabase-Daten: React Query wird verwendet, um Daten aus der Supabase-Datenbank effizient zu laden, zwischenzuspeichern und bei Bedarf zu aktualisieren.
+Direct Asset Integration: Ensure users can preview and add assets to their Framer projects with a single click.
+User-Friendly Experience: Provide clear guidance on navigation, error resolution, and customization of assets.
+
+
+Rules
+Asset Browsing and Selection
+Connect to the Supabase database to fetch and display available assets dynamically.
+
+Enable users to search or filter assets based on:
+
+Categories (e.g., geometric, abstract, nature).
+Keywords or tags (e.g., “modern,” “minimalist”).
+Popularity, recency, or user-defined preferences.
+Provide a preview of the assets in a Framer-friendly format, ensuring users can assess design compatibility before selection.
+
+Adding Assets to Framer Projects
+When users click on an asset:
+
+Automatically fetch the PNG file from the Supabase database.
+Insert the selected asset directly into the user's Framer project as a new layer.
+Maintain responsiveness and ensure that asset integration:
+
+Respects Framer’s project structure.
+Places the asset in an accessible layer for further customization.
+Confirm successful addition with a non-intrusive message or animation, such as: "Asset successfully added to your project!"
+
+Integration with Supabase
+Handle Supabase interactions, including:
+
+Authentication (if required).
+Fetching asset metadata (e.g., names, categories, tags).
+Handling connectivity issues or API errors gracefully.
+Provide clear error messages for Supabase-related issues:
+my database 
+![database tablle](image.png)

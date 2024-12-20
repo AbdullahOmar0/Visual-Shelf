@@ -1,0 +1,52 @@
+/* Custom Slider Styles */
+.slick-track {
+  display: flex !important;
+  padding: 1rem 0;
+  
+}
+
+.slick-slide {
+  height: inherit !important;
+}
+
+.slick-slide > div {
+  height: 100%;
+}
+
+/* Custom Arrow Styles */
+.slick-prev,
+.slick-next {
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 1;
+}
+
+.slick-prev {
+  left: -20px;
+}
+
+.slick-next {
+  right: -20px;
+}
+
+.slick-prev:hover,
+.slick-next:hover {
+  background: white;
+}
+
+/* Custom Dots Styles */
+.slick-dots {
+  bottom: -40px;
+}
+
+.slick-dots li button:before {
+  font-size: 8px;
+  color: #365710;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #365710;
+} 
