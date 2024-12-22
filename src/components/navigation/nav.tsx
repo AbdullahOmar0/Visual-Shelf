@@ -19,6 +19,7 @@ export function Nav({ activeCategory, onCategorySelect }: NavProps) {
   // Standard styles für den "All" Tab
   const allTabStyle = !activeCategory ? {
     background: 'linear-gradient(to bottom right, #585858, #000000)',
+    borderimage: 'linear-gradient(90deg, hsla(0, 0%, 100%, 0) 10%, hsla(0, 0%, 100%, .3) 50%, hsla(0, 0%, 100%, 0) 90%) 1 / 2px',
     color: '#FFFFFF',
     boxShadow: '0 2px 4px rgba(0,0,0,0.08), 0 0 6px rgba(0,0,0,0.02)'
   } : {
