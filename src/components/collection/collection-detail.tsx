@@ -1,5 +1,6 @@
 import { Collection } from '../../types/motif.types'
 import { useState } from 'react'
+import { framer } from 'framer-plugin'
 
 interface CollectionDetailProps {
   collection: Collection
@@ -9,16 +10,38 @@ interface CollectionDetailProps {
 
 export function CollectionDetail({ collection, onInsert, onBack }: CollectionDetailProps) {
   const [selectedAsset, setSelectedAsset] = useState(collection.assets?.[0])
+  const [isInserting, setIsInserting] = useState(false)
+
+  const handleInsert = async () => {
+    if (!selectedAsset) return
+    
+    try {
+      setIsInserting(true)
+      
+      // Füge das Bild in Framer ein
+      await framer.addImage({
+        image: selectedAsset.image_url,
+        name: selectedAsset.name || 'Background Motif',
+      
+        resolution: "full" // Höchste Qualität für Hintergrundmotive
+      })
+
+      // Benachrichtige den Parent über erfolgreichen Insert
+      onInsert(selectedAsset.id)
+      
+      // Korrekte Verwendung der Framer UI API
+      framer.notify("Motif successfully added!")
+      
+    } catch (error) {
+      console.error('Failed to insert image:', error)
+      framer.notify("Failed to add motif. Please try again.")
+    } finally {
+      setIsInserting(false)
+    }
+  }
 
   return (
     <div className="w-full p-8">
-   {/*   <div className="flex justify-between items-center mb-6">
-        <button onClick={onBack} className="text-gray-600 hover:text-gray-800">
-          &lt; back to category
-        </button>
-        <h1 className="text-2xl font-serif">{collection.name}</h1>
-      </div>*/}
-
       <div className="flex gap-8">
         {/* Großes Hauptbild */}
         <div className="w-1/2">
@@ -28,10 +51,13 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
             className="w-full rounded-lg shadow-lg"
           />
           <button 
-            onClick={() => selectedAsset && onInsert(selectedAsset.id)}
-            className="mt-4 w-full py-2 bg-gray-800 text-white rounded-md"
+            onClick={handleInsert}
+            disabled={isInserting}
+            className={`mt-4 w-full py-2 bg-gray-800 text-white rounded-md
+              ${isInserting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}
+            `}
           >
-            Insert
+            {isInserting ? 'Inserting...' : 'Insert'}
           </button>
         </div>
 
