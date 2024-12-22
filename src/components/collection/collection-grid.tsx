@@ -3,6 +3,7 @@ import { CollectionCard } from './collection-card'
 import Slider from "react-slick"
 import "slick-carousel/slick/slick.css"
 import "slick-carousel/slick/slick-theme.css"
+import { useNavigate } from 'react-router-dom'
 
 export function CollectionGrid({ 
   title, 
@@ -11,8 +12,11 @@ export function CollectionGrid({
   onCollectionClick,
   activeGradient,
   text_color,
-  isMainView = false
+  isMainView = false,
+  categoryId
 }: CollectionGridProps) {
+  const navigate = useNavigate()
+
   const settings = {
     dots: false,
     arrows: false,
@@ -43,12 +47,20 @@ export function CollectionGrid({
     ],
   }
 
+  const handleExploreAll = () => {
+    if (isMainView && categoryId) {
+      onExploreAll(categoryId)
+    } else {
+      navigate(`/collection/${collections[0].id}`)
+    }
+  }
+
   return (
     <section className="w-full px-8 py-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-serif" style={{ color: text_color || '#365710' }}>{title}</h2>
         <button 
-          onClick={onExploreAll}
+          onClick={handleExploreAll}
           className="w-fit h-fit rounded-md px-4 py-2 text-sm shadow-sm transition-colors"
           style={{
             background: activeGradient || '#F8F8F8',

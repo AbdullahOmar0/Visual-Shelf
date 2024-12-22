@@ -10,11 +10,12 @@ export interface CollectionCardProps {
 export interface CollectionGridProps {
   title: string
   collections: Collection[]
-  onExploreAll: () => void
+  onExploreAll: (categoryId?: string) => void
   onCollectionClick: (id: string) => void
-  activeGradient?: string | null
-  text_color?: string | null
+  activeGradient?: string
+  text_color?: string
   isMainView?: boolean
+  categoryId?: string
 }
 
 export interface NavProps {

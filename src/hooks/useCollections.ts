@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { Collection, Asset } from '../types/types'
+import { Collection } from '../types/motif.types'
+import { Asset } from '../types/types'
 
 export function useCollections() {
   return useQuery<Collection[]>({

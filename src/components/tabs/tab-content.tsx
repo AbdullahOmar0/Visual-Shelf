@@ -6,16 +6,16 @@ interface TabContentProps {
   activeCategory: string
   categories: Category[] | undefined
   collectionsWithPreviews: any[] | undefined
-  handleExplore: () => void
   handleCollectionClick: (id: string) => void
+  handleExploreAll: (categoryId?: string) => void
 }
 
 export function TabContent({ 
   activeCategory, 
   categories, 
   collectionsWithPreviews,
-  handleExplore,
-  handleCollectionClick 
+  handleCollectionClick,
+  handleExploreAll
 }: TabContentProps) {
   
   // Wenn keine Kategorie ausgewählt ist, zeige alle Kategorien
@@ -34,11 +34,12 @@ export function TabContent({
               <CollectionGrid
                 title={category.label}
                 collections={categoryCollections}
-                onExploreAll={handleExplore}
+                onExploreAll={handleExploreAll}
                 onCollectionClick={handleCollectionClick}
-                activeGradient={category.active_gradient}
-                text_color={category.text_color}
+                activeGradient={category.active_gradient || undefined}
+                text_color={category.text_color || undefined}
                 isMainView={true}
+                categoryId={category.id}
               />
             </section>
           )
@@ -71,11 +72,12 @@ export function TabContent({
           <CollectionGrid
             title={collection.name}
             collections={[collection]}
-            onExploreAll={handleExplore}
+            onExploreAll={handleExploreAll}
             onCollectionClick={handleCollectionClick}
-            activeGradient={activeCateg.active_gradient}
-            text_color={activeCateg.text_color}
+            activeGradient={activeCateg.active_gradient || undefined}
+            text_color={activeCateg.text_color || undefined}
             isMainView={false}
+            categoryId={activeCateg.id}
           />
         </section>
       ))}
