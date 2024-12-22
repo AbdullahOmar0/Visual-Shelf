@@ -10,20 +10,6 @@ export interface Asset {
   format: string | null
 }
 
-export interface Collection {
-  id: string
-  name: string
-  preview_images: string[]
-  category_id: string
-  created_at: string
-  assets?: Array<{
-    id: string
-    image_url: string
-    name?: string
-    is_premium?: boolean
-  }>
-}
-
 export interface Category {
   id: string
   name: string

@@ -1,16 +1,23 @@
-import type { DatabaseAsset, DatabaseCollection, DatabaseCategory } from './database.types'
-
-export interface Asset extends Omit<DatabaseAsset, 'width' | 'height' | 'format'> {
-  width: number
-  height: number
-  format: string
+export interface Asset {
+  id: string
+  image_url: string
+  name?: string
+  is_premium?: boolean
+  width?: number
+  height?: number
+  format?: string
+  created_at?: string
+  collection_id?: string
 }
 
-export interface Collection extends Omit<DatabaseCollection, 'preview_images'> {
-  preview_images?: string[]
+export interface Collection {
+  id: string
+  name: string
+  category_id: string
+  created_at: string
   assets?: Asset[]
 }
 
-export interface Category extends DatabaseCategory {
+export interface Category {
   // Zusätzliche Geschäftslogik-Eigenschaften hier
 } 
