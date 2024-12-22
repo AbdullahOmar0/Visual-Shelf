@@ -16,6 +16,12 @@ export interface Collection {
   preview_images: string[]
   category_id: string
   created_at: string
+  assets?: Array<{
+    id: string
+    image_url: string
+    name?: string
+    is_premium?: boolean
+  }>
 }
 
 export interface Category {

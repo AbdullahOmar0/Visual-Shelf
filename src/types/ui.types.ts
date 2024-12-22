@@ -1,37 +1,10 @@
-export interface Asset {
-  id: string
-  collection_id: string
-  name: string
-  image_url: string
-  width: number
-  height: number
-  is_premium: boolean
-  format: string
-  created_at: string
-}
-
-export interface Collection {
-  id: string
-  name: string
-  category_id: string
-  created_at: string
-  assets?: Asset[]
-}
-
-export interface Category {
-  id: string
-  name: string
-  slug: string
-  active_gradient: string | null
-  text_color: string | null
-  label: string
-  created_at: string
-}
+import type { Collection } from './motif.types'
 
 export interface CollectionCardProps {
   title: string
   images: string[]
   onClick: () => void
+  isPremium?: boolean
 }
 
 export interface CollectionGridProps {
@@ -40,6 +13,8 @@ export interface CollectionGridProps {
   onExploreAll: () => void
   onCollectionClick: (id: string) => void
   activeGradient?: string | null
+  text_color?: string | null
+  isMainView?: boolean
 }
 
 export interface NavProps {
@@ -49,4 +24,12 @@ export interface NavProps {
 
 export interface BannerProps {
   onExplore: () => void
+}
+
+export interface Category {
+  id: string
+  label: string
+  slug: string
+  active_gradient?: string
+  text_color?: string
 } 
