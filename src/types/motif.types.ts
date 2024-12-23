@@ -1,10 +1,11 @@
 export interface Asset {
   id: string
+  name: string
   image_url: string
-  name?: string
-  is_premium?: boolean
+  is_premium: boolean
   width?: number
   height?: number
+  file_size?: number
   format?: string
   created_at?: string
   collection_id?: string

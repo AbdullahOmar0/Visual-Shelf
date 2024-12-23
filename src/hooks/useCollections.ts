@@ -15,7 +15,11 @@ export function useCollections() {
             id,
             name,
             image_url,
-            is_premium
+            is_premium,
+            width,
+            height,
+            format,
+            created_at
           )
         `)
         .order('created_at', { ascending: false })
