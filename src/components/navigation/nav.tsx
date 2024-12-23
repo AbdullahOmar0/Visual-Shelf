@@ -1,5 +1,6 @@
 import { NavProps } from '../../types/ui.types'
 import { useCategories } from '../../hooks/useCategories'
+import { UserMenu } from '../user-menu'
 
 export function Nav({ activeCategory, onCategorySelect }: NavProps) {
   const { data: categories, isLoading } = useCategories()
@@ -28,30 +29,34 @@ export function Nav({ activeCategory, onCategorySelect }: NavProps) {
 
   return (
     <header className="w-full max-w-[700px] mx-auto py-3 border-b border-[#f8f8f8]">
-      <nav className="flex gap-2.5 px-5">
-        <div 
-          onClick={() => onCategorySelect('')}
-          className="cursor-pointer rounded-md px-3 py-1.5 text-sm"
-          style={allTabStyle}
-        >
-          All
-        </div>
-
-        {categories?.map(category => (
+      <div className="flex justify-between items-center px-5">
+        <nav className="flex gap-2.5">
           <div 
-            key={category.id}
-            onClick={() => onCategorySelect(category.slug)}
+            onClick={() => onCategorySelect('')}
             className="cursor-pointer rounded-md px-3 py-1.5 text-sm"
-            style={{
-              ...(activeCategory === category.slug ? getGradientStyle(category.active_gradient) : {}),
-              ...getTextColorStyle(category.text_color),
-              ...(activeCategory === category.slug ? { boxShadow: '0 2px 4px rgba(0,0,0,0.08), 0 0 6px rgba(0,0,0,0.02)' } : {})
-            }}
+            style={allTabStyle}
           >
-            {category.label}
+            All
           </div>
-        ))}
-      </nav>
+
+          {categories?.map(category => (
+            <div 
+              key={category.id}
+              onClick={() => onCategorySelect(category.slug)}
+              className="cursor-pointer rounded-md px-3 py-1.5 text-sm"
+              style={{
+                ...(activeCategory === category.slug ? getGradientStyle(category.active_gradient) : {}),
+                ...getTextColorStyle(category.text_color),
+                ...(activeCategory === category.slug ? { boxShadow: '0 2px 4px rgba(0,0,0,0.08), 0 0 6px rgba(0,0,0,0.02)' } : {})
+              }}
+            >
+              {category.label}
+            </div>
+          ))}
+        </nav>
+        
+        <UserMenu />
+      </div>
     </header>
   )
 }
