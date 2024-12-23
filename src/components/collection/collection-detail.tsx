@@ -67,13 +67,11 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
     }
   }
 
-
-
   return (
-    <div className="w-full p-8">
+    <div className="w-full p-8 ">
       <div className="flex gap-8">
         {/* Hauptbild-Container mit mehr Breite */}
-        <div className="w-2/3">
+        <div className="w-2/3 ">
           <div className="relative aspect-[16/9] mb-4">
             <img 
               src={selectedAsset?.image_url} 
@@ -159,7 +157,7 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
         </div>
 
         {/* Thumbnail-Grid mit weniger Breite */}
-        <div className="w-1/3 grid grid-cols-2 gap-2  h-[370px] ">
+        <div className="w-1/3 grid grid-cols-2 gap-2 h-[360px]">
           {collection.assets?.map(asset => (
             <div 
               key={asset.id}

@@ -37,6 +37,18 @@ export function App() {
     preview_images: collection.assets?.map((asset: { image_url: string }) => asset.image_url) || []
   }))
 
+  const handleCategorySelect = (category: string) => {
+    setActiveCategory(category)
+    if (category === '') {
+      navigate('/')
+    } else {
+      const selectedCategory = categories?.find(c => c.slug === category)
+      if (selectedCategory) {
+        navigate(`/category/${selectedCategory.id}`)
+      }
+    }
+  }
+
   try {
     const handleExplore = () => {
       console.log('Explore clicked')
@@ -67,17 +79,27 @@ export function App() {
     }
 
     return (
-      <div className="w-full min-h-screen bg-white">
+      <div className="min-h-screen bg-white">
         <div className="w-full max-w-[700px] mx-auto">
           <Nav 
             activeCategory={activeCategory}
-            onCategorySelect={setActiveCategory}
+            onCategorySelect={handleCategorySelect}
           />
-          
-          <Routes>
-            <Route path="/" element={
-              <>
-                {!activeCategory && <Banner onExplore={handleExplore} />}
+          <div className="mt-4">
+            <Routes>
+              <Route path="/" element={
+                <>
+                  {!activeCategory && <Banner onExplore={handleExplore} />}
+                  <TabContent 
+                    activeCategory={activeCategory}
+                    categories={categories}
+                    collectionsWithPreviews={collectionsWithPreviews}
+                    handleCollectionClick={handleCollectionClick}
+                    handleExploreAll={handleExploreAll}
+                  />
+                </>
+              } />
+              <Route path="/category/:categoryId" element={
                 <TabContent 
                   activeCategory={activeCategory}
                   categories={categories}
@@ -85,22 +107,13 @@ export function App() {
                   handleCollectionClick={handleCollectionClick}
                   handleExploreAll={handleExploreAll}
                 />
-              </>
-            } />
-            <Route path="/category/:categoryId" element={
-              <TabContent 
-                activeCategory={activeCategory}
-                categories={categories}
-                collectionsWithPreviews={collectionsWithPreviews}
-                handleCollectionClick={handleCollectionClick}
-                handleExploreAll={handleExploreAll}
+              } />
+              <Route 
+                path="/collection/:id" 
+                element={<CollectionRoute onInsert={handleInsert} />} 
               />
-            } />
-            <Route 
-              path="/collection/:id" 
-              element={<CollectionRoute onInsert={handleInsert} />} 
-            />
-          </Routes>
+            </Routes>
+          </div>
         </div>
       </div>
     )
