@@ -19,6 +19,7 @@
     "@tanstack/react-query": "^5.62.8",
     "framer-plugin": "^2",
     "react": "^18",
+    "react-confetti": "^6.1.0",
     "react-dom": "^18",
     "react-router-dom": "^7.1.0",
     "react-slick": "^0.30.3",
