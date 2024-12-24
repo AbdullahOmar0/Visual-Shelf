@@ -10,6 +10,8 @@ interface LicenseValidateResponse {
     activation_limit?: number
     activation_usage?: number
     instances?: Array<Instance>
+    customer_name?: string
+    customer_email?: string
   }
 }
 
@@ -81,31 +83,15 @@ export class LicenseService {
         }
       }
 
-      if (!data.valid) {
-        return {
-          valid: false,
-          error: 'Ungültiger Lizenzschlüssel'
-        }
-      }
-
-      // Überprüfe, ob der Lizenzschlüssel zu unserem Store gehört
+      // Überprüfe Store und Produkt ID
       if (data.meta.store_id !== Number(import.meta.env.VITE_LEMON_SQUEEZY_STORE_ID)) {
-        console.error('Store ID stimmt nicht überein:', {
-          expected: import.meta.env.VITE_LEMON_SQUEEZY_STORE_ID,
-          received: data.meta.store_id
-        })
         return {
           valid: false,
           error: 'Dieser Lizenzschlüssel gehört nicht zu unserem Store'
         }
       }
 
-      // Überprüfe, ob der Lizenzschlüssel zu unserem Produkt gehört
       if (data.meta.product_id !== Number(import.meta.env.VITE_LEMON_SQUEEZY_PRODUCT_ID)) {
-        console.error('Product ID stimmt nicht überein:', {
-          expected: import.meta.env.VITE_LEMON_SQUEEZY_PRODUCT_ID,
-          received: data.meta.product_id
-        })
         return {
           valid: false,
           error: 'Dieser Lizenzschlüssel ist für ein anderes Produkt'
@@ -113,43 +99,58 @@ export class LicenseService {
       }
 
       // Überprüfe den Status der Lizenz
-      switch (data.license_key.status) {
-        case 'inactive':
-          // Prüfe das Aktivierungslimit
-          if (data.license_key.activation_limit && 
-              data.license_key.activation_usage >= data.license_key.activation_limit) {
-            console.error('Aktivierungslimit erreicht:', {
-              limit: data.license_key.activation_limit,
-              usage: data.license_key.activation_usage
-            })
-            return {
-              valid: false,
-              error: 'Das Aktivierungslimit wurde erreicht'
-            }
-          }
-          break
-        case 'active':
-          return {
-            valid: false,
-            error: 'Diese Lizenz wurde bereits aktiviert'
-          }
-        case 'expired':
-          return {
-            valid: false,
-            error: 'Diese Lizenz ist abgelaufen'
-          }
-        case 'disabled':
-          return {
-            valid: false,
-            error: 'Diese Lizenz wurde deaktiviert'
-          }
-        default:
-          return {
-            valid: false,
-            error: 'Ungültiger Lizenzstatus'
-          }
+      if (data.license_key.status === 'expired') {
+        return {
+          valid: false,
+          error: 'Diese Lizenz ist abgelaufen'
+        }
       }
 
+      if (data.license_key.status === 'disabled') {
+        return {
+          valid: false,
+          error: 'Diese Lizenz wurde deaktiviert'
+        }
+      }
+
+      // Prüfe das Aktivierungslimit
+      if (data.license_key.activation_limit && 
+          data.license_key.activation_usage > data.license_key.activation_limit) {
+        return {
+          valid: false,
+          error: 'Das Aktivierungslimit wurde erreicht'
+        }
+      }
+
+      // Prüfe, ob es sich um eine gespeicherte Lizenz handelt
+      const savedKey = localStorage.getItem('license_key')
+      const isStoredLicense = savedKey === licenseKey
+
+      // Wenn es die gespeicherte Lizenz ist, akzeptiere sie auch wenn sie aktiv ist
+      if (isStoredLicense) {
+        return {
+          valid: true,
+          meta: {
+            store_id: data.meta.store_id,
+            product_id: data.meta.product_id,
+            status: data.license_key.status,
+            activation_limit: data.license_key.activation_limit,
+            activation_usage: data.license_key.activation_usage,
+            customer_name: data.meta.customer_name,
+            customer_email: data.meta.customer_email
+          }
+        }
+      }
+
+      // Für neue Aktivierungen: Prüfe, ob die Lizenz bereits aktiviert wurde
+      if (data.license_key.status === 'active' && data.license_key.activation_usage > 0) {
+        return {
+          valid: false,
+          error: 'Diese Lizenz wurde bereits aktiviert'
+        }
+      }
+
+      // Wenn die Lizenz gültig ist, geben wir sie zurück
       return {
         valid: true,
         meta: {
@@ -157,7 +158,9 @@ export class LicenseService {
           product_id: data.meta.product_id,
           status: data.license_key.status,
           activation_limit: data.license_key.activation_limit,
-          activation_usage: data.license_key.activation_usage
+          activation_usage: data.license_key.activation_usage,
+          customer_name: data.meta.customer_name,
+          customer_email: data.meta.customer_email
         }
       }
     } catch (err) {
@@ -171,35 +174,18 @@ export class LicenseService {
 
   static async activateLicense(licenseKey: string): Promise<LicenseValidateResponse> {
     try {
-      console.log('Starte Lizenzaktivierung für:', licenseKey)
-
       // Erst validieren
       const validationResult = await this.validateLicense(licenseKey)
-      console.log('Validierungsergebnis:', validationResult)
-
       if (!validationResult.valid) {
         return validationResult
       }
 
-      // Prüfe den Status der Lizenz
-      const status = validationResult.meta?.status
-      if (status === 'expired') {
-        return {
-          valid: false,
-          error: 'Diese Lizenz ist abgelaufen'
-        }
-      }
-      if (status === 'disabled') {
-        return {
-          valid: false,
-          error: 'Diese Lizenz wurde deaktiviert'
-        }
-      }
-      if (status === 'active') {
-        return {
-          valid: false,
-          error: 'Diese Lizenz wurde bereits aktiviert'
-        }
+      // Wenn die Lizenz bereits aktiv ist, speichern und zurückgeben
+      if (validationResult.meta?.status === 'active') {
+        localStorage.setItem('license_key', licenseKey)
+        localStorage.setItem('customer_name', validationResult.meta.customer_name || '')
+        localStorage.setItem('customer_email', validationResult.meta.customer_email || '')
+        return validationResult
       }
 
       // Aktivierung versuchen
@@ -230,14 +216,11 @@ export class LicenseService {
         }
       }
 
-      if (!data.activated) {
-        return {
-          valid: false,
-          error: 'Aktivierung wurde vom Server abgelehnt'
-        }
-      }
+      // Speichere die erfolgreiche Aktivierung
+      localStorage.setItem('license_key', licenseKey)
+      localStorage.setItem('customer_name', data.meta.customer_name)
+      localStorage.setItem('customer_email', data.meta.customer_email)
 
-      // Erfolgreiche Aktivierung
       return {
         valid: true,
         meta: {
@@ -246,7 +229,8 @@ export class LicenseService {
           status: 'active',
           activation_limit: data.license_key.activation_limit,
           activation_usage: data.license_key.activation_usage,
-          instances: data.instance ? [data.instance] : undefined
+          customer_name: data.meta.customer_name,
+          customer_email: data.meta.customer_email
         }
       }
     } catch (err) {
@@ -257,4 +241,4 @@ export class LicenseService {
       }
     }
   }
-} 
+}

@@ -1,36 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Dialog } from '@headlessui/react'
 import { PersonIcon, GlobeIcon, QuestionMarkCircledIcon, ExitIcon, SunIcon } from '@radix-ui/react-icons'
-import { LicenseService } from '../services/license-service'
 import { useLicense } from '../hooks/use-license'
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { isValid, isLoading } = useLicense()
-  const [isActivated, setIsActivated] = useState(false)
-
-  useEffect(() => {
-    // Aktualisiere den Aktivierungsstatus basierend auf der Lizenzvalidierung
-    setIsActivated(isValid)
-  }, [isValid])
-
-  async function activateLicense(key: string) {
-    try {
-      const result = await LicenseService.activateLicense(key)
-
-      if (result.valid) {
-        setIsActivated(true)
-        setError(null)
-        localStorage.setItem('license_key', key)
-        setIsOpen(false)
-      } else {
-        setError(result.error || 'Aktivierung fehlgeschlagen')
-      }
-    } catch (err) {
-      setError('Ein Fehler ist aufgetreten')
-    }
-  }
+  const { isValid, isLoading, customerName, activateLicense, deactivateLicense } = useLicense()
 
   const handleActivateClick = () => {
     const dialog = document.createElement('dialog')
@@ -40,11 +16,16 @@ export function UserMenu() {
       <h2 class="text-lg font-medium mb-4">Lizenz aktivieren</h2>
       <div class="space-y-4">
         <div class="text-sm text-gray-600 mb-4">
-          Gib deinen Lizenzschlüssel ein, den du nach dem Kauf erhalten hast.
+          Gib deinen Lizenzschlüssel und die E-Mail-Adresse ein, die du beim Kauf verwendet hast.
         </div>
         <input
           type="text"
           placeholder="XXXX-XXXX-XXXX-XXXX"
+          class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <input
+          type="email"
+          placeholder="E-Mail-Adresse"
           class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
         <div class="error-container"></div>
@@ -60,7 +41,8 @@ export function UserMenu() {
     document.body.appendChild(dialog)
     dialog.showModal()
 
-    const input = dialog.querySelector('input')
+    const licenseInput = dialog.querySelector('input[type="text"]') as HTMLInputElement
+    const emailInput = dialog.querySelector('input[type="email"]') as HTMLInputElement
     const button = dialog.querySelector('button')
     const errorContainer = dialog.querySelector('.error-container')
 
@@ -79,8 +61,18 @@ export function UserMenu() {
     }
 
     button?.addEventListener('click', async () => {
-      if (!input?.value) {
+      if (!licenseInput?.value) {
         showError('Bitte gib einen Lizenzschlüssel ein')
+        return
+      }
+
+      if (!emailInput?.value) {
+        showError('Bitte gib deine E-Mail-Adresse ein')
+        return
+      }
+
+      if (!emailInput.value.includes('@')) {
+        showError('Bitte gib eine gültige E-Mail-Adresse ein')
         return
       }
 
@@ -93,9 +85,8 @@ export function UserMenu() {
       `
 
       try {
-        const result = await LicenseService.validateLicense(input.value)
-        if (result.valid) {
-          await activateLicense(input.value)
+        const result = await activateLicense(licenseInput.value, emailInput.value)
+        if (result.success) {
           dialog.close()
         } else {
           showError(result.error || 'Ungültiger Lizenzschlüssel')
@@ -109,7 +100,7 @@ export function UserMenu() {
     })
 
     // Format license key as user types
-    input?.addEventListener('input', (e) => {
+    licenseInput?.addEventListener('input', (e) => {
       const target = e.target as HTMLInputElement
       let value = target.value.replace(/[^A-Za-z0-9-]/g, '')
       target.value = value
@@ -122,14 +113,12 @@ export function UserMenu() {
 
   const menuItems = [
     {
-      icon: isActivated ? <ExitIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />,
-      title: isActivated ? "Logout" : "Activate License Key",
-      subtitle: isActivated ? "Sign out from your account" : "Sign in to your account",
-      onClick: isActivated ? () => {
-        localStorage.removeItem('license_key')
-        setIsActivated(false)
+      icon: isValid ? <ExitIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />,
+      title: isValid ? "Logout" : "Activate License Key",
+      subtitle: isValid ? "Sign out from your account" : "Sign in to your account",
+      onClick: isValid ? () => {
+        deactivateLicense()
         setIsOpen(false)
-        window.location.reload() // Seite neu laden um alle Zustände zurückzusetzen
       } : handleActivateClick
     },
     {
@@ -146,14 +135,18 @@ export function UserMenu() {
     }
   ]
 
+  if (isLoading) {
+    return null // oder einen Ladezustand anzeigen
+  }
+
   return (
     <>
-      <a
+      <button
         onClick={() => setIsOpen(true)}
         className="p-2 rounded-full hover:bg-gray-100"
       >
         <PersonIcon className="w-6 h-6" />
-      </a>
+      </button>
 
       <Dialog
         open={isOpen}
@@ -167,15 +160,13 @@ export function UserMenu() {
             {/* Profile Header */}
             <div className="flex flex-col items-center py-8 px-4 border-b border-gray-100">
               <div className="w-20 h-20 mb-4">
-                <img 
-                  src="/path-to-your-avatar.png" 
-                  alt="Avatar"
-                  className="w-full h-full rounded-full object-cover"
-                />
+                <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-semibold">
+                  {customerName.charAt(0).toUpperCase()}
+                </div>
               </div>
-              <h2 className="text-2xl font-semibold mb-2">Abdullah</h2>
-              <div className={`${isActivated ? 'bg-blue-500' : 'bg-gray-500'} text-white px-4 py-1.5 rounded-full text-sm`}>
-                {isActivated ? 'Premium Member' : 'Free User'}
+              <h2 className="text-2xl font-semibold mb-2">{customerName}</h2>
+              <div className={`${isValid ? 'bg-blue-500' : 'bg-gray-500'} text-white px-4 py-1.5 rounded-full text-sm`}>
+                {isValid ? 'Premium Member' : 'Free User'}
               </div>
             </div>
 
