@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { framer } from 'framer-plugin'
 import { InfoCircledIcon } from '@radix-ui/react-icons'
 import * as Popover from '@radix-ui/react-popover'
+import { useLicense } from '../../hooks/use-license'
 
 interface CollectionDetailProps {
   collection: Collection
@@ -25,14 +26,15 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
   const [selectedAsset, setSelectedAsset] = useState(collection.assets?.[0])
   const [isInserting, setIsInserting] = useState(false)
   const [imageMetadata, setImageMetadata] = useState<{width: number, height: number}>()
+  const { isValid: hasValidLicense } = useLicense()
 
   const handleInsert = async () => {
     if (!selectedAsset) return
+    if (selectedAsset.is_premium && !hasValidLicense) return
     
     try {
       setIsInserting(true)
 
-      // Füge das Bild direkt mit der korrekten Auflösung ein
       await framer.addImage({
         image: selectedAsset.image_url,
         name: selectedAsset.name || 'Background Motif',
@@ -51,6 +53,24 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
     } finally {
       setIsInserting(false)
     }
+  }
+
+  const getButtonText = () => {
+    if (isInserting) return 'Inserting...'
+    if (selectedAsset?.is_premium && !hasValidLicense) {
+      return '🔒 Upgrade to Insert Premium Motifs'
+    }
+    return 'Insert Motif'
+  }
+
+  const getButtonStyle = () => {
+    if (isInserting) {
+      return 'opacity-50 cursor-not-allowed'
+    }
+    if (selectedAsset?.is_premium && !hasValidLicense) {
+      return 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600'
+    }
+    return 'bg-black hover:bg-gray-700'
   }
 
   // Vorschaubilder werden als Base64 Data URLs gespeichert
@@ -105,7 +125,7 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
     <div className="w-full p-8 ">
       <div className="flex gap-8">
         <div className="w-2/3 ">
-          <div className="relative aspect-[16/9] mb-4 bg-gray-50 rounded-lg shadow-lg">
+          <div className="relative aspect-[16/9] mb-4 bg-gray-50 rounded-lg shadow-lg overflow-hidden">
             {selectedAsset && previewDataUrls[selectedAsset.id] && (
               <img 
                 src={previewDataUrls[selectedAsset.id]}
@@ -180,17 +200,17 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
 
           <button 
             onClick={handleInsert}
-            disabled={isInserting}
-            className={`w-full h-fit py-3 px-4 bg-black text-white rounded-lg transition-colors
-              ${isInserting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}
+            disabled={isInserting || (selectedAsset?.is_premium && !hasValidLicense)}
+            className={`w-full h-fit py-3 px-4 text-white rounded-lg transition-all
+              ${getButtonStyle()}
               font-medium
             `}
           >
-            {isInserting ? 'Inserting...' : 'Insert Motif'}
+            {getButtonText()}
           </button>
         </div>
 
-        <div className="w-1/3 grid grid-cols-2 gap-2 h-[360px]">
+        <div className="w-1/3 grid grid-cols-2 gap-2 h-[355px]">
           {collection.assets?.map(asset => (
             <div 
               key={asset.id}
