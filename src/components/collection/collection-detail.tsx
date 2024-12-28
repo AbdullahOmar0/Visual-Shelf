@@ -1,7 +1,7 @@
 import { Collection } from '../../types/motif.types'
 import { useState, useEffect } from 'react'
 import { framer } from 'framer-plugin'
-import { InfoCircledIcon } from '@radix-ui/react-icons'
+import { InfoCircledIcon, StarFilledIcon } from '@radix-ui/react-icons'
 import * as Popover from '@radix-ui/react-popover'
 import { useLicense } from '../../hooks/use-license'
 
@@ -58,19 +58,19 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
   const getButtonText = () => {
     if (isInserting) return 'Inserting...'
     if (selectedAsset?.is_premium && !hasValidLicense) {
-      return '🔒 Upgrade to Insert Premium Motifs'
+      return '⭐️ Upgrade to Premium'
     }
     return 'Insert Motif'
   }
 
   const getButtonStyle = () => {
     if (isInserting) {
-      return 'opacity-50 cursor-not-allowed'
+      return 'opacity-50 cursor-not-allowed bg-black'
     }
     if (selectedAsset?.is_premium && !hasValidLicense) {
-      return 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600'
+      return 'bg-yellow-500 hover:bg-yellow-600 text-black font-semibold'
     }
-    return 'bg-black hover:bg-gray-700'
+    return 'bg-black hover:bg-gray-700 text-white'
   }
 
   // Vorschaubilder werden als Base64 Data URLs gespeichert
@@ -134,8 +134,9 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
               />
             )}
             {selectedAsset?.is_premium && (
-              <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-                Premium
+              <div className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg flex items-center gap-1.5">
+                <StarFilledIcon className="w-4 h-4" />
+                <span className="translate-y-[0.5px]">Premium</span>
               </div>
             )}
           </div>
@@ -198,16 +199,31 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
             </Popover.Root>
           </div>
 
-          <button 
-            onClick={handleInsert}
-            disabled={isInserting || (selectedAsset?.is_premium && !hasValidLicense)}
-            className={`w-full h-fit py-3 px-4 text-white rounded-lg transition-all
-              ${getButtonStyle()}
-              font-medium
-            `}
-          >
-            {getButtonText()}
-          </button>
+          {selectedAsset?.is_premium && !hasValidLicense ? (
+            <a 
+              href="https://visualshelf.framer.website/pricing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`w-full h-fit py-3 px-4 rounded-lg transition-all text-center block
+                ${getButtonStyle()}
+                font-medium
+              `}
+              
+            >
+              {getButtonText()}
+            </a>
+          ) : (
+            <button 
+              onClick={handleInsert}
+              disabled={isInserting}
+              className={`w-full h-fit py-3 px-4 rounded-lg transition-all 
+                ${getButtonStyle()}
+                font-medium
+              `}
+            >
+              {getButtonText()}
+            </button>
+          )}
         </div>
 
         <div className="w-1/3 grid grid-cols-2 gap-2 h-[355px]">
@@ -228,8 +244,8 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
                 />
               )}
               {asset.is_premium && (
-                <div className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-sm">
-                  Premium
+                <div className="absolute top-2 right-2 bg-yellow-500 text-white p-1 rounded-full shadow-sm">
+                  <StarFilledIcon className="w-3.5 h-3.5" />
                 </div>
               )}
             </div>
