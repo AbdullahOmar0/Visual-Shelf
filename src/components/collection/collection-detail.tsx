@@ -133,7 +133,7 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
                 className="absolute inset-0 w-full h-full object-contain"
               />
             )}
-            {selectedAsset?.is_premium && (
+            {selectedAsset?.is_premium && !hasValidLicense && (
               <div className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg flex items-center gap-1.5">
                 <StarFilledIcon className="w-4 h-4" />
                 <span className="translate-y-[0.5px]">Premium</span>
@@ -243,9 +243,9 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
                   `}
                 />
               )}
-              {asset.is_premium && (
-                <div className="absolute top-2 right-2 bg-yellow-500 text-white p-1 rounded-full shadow-sm">
-                  <StarFilledIcon className="w-3.5 h-3.5" />
+              {asset.is_premium && !hasValidLicense && (
+                <div className="absolute top-2 right-2 bg-yellow-400 text-white p-1 rounded-full shadow-sm">
+                  <StarFilledIcon className="w-3.5 h-3.5 " />
                 </div>
               )}
             </div>
