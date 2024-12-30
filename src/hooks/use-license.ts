@@ -78,16 +78,27 @@ export function useLicense() {
     try {
       setState(prev => ({ ...prev, isLoading: true }))
       console.log('Aktiviere Lizenz:', key, 'für E-Mail:', email)
+      
+      // Speichere die E-Mail für die Validierung
+      localStorage.setItem('activation_email', email)
+      
       const result = await LicenseService.activateLicense(key)
       console.log('Aktivierungsergebnis:', result)
 
       // Überprüfe, ob die E-Mail-Adresse übereinstimmt
       if (result.valid && result.meta && result.meta.customer_email === email) {
         console.log('Aktivierung erfolgreich und E-Mail stimmt überein:', result)
+        
+        // Speichere alle notwendigen Daten
         localStorage.setItem('license_key', key)
         localStorage.setItem('is_valid', 'true')
         localStorage.setItem('customer_name', result.meta.customer_name || 'User')
         localStorage.setItem('customer_email', email)
+        
+        // Wenn wir eine instance_id haben, speichere sie auch
+        if (result.meta.instance_id) {
+          localStorage.setItem('instance_id', result.meta.instance_id)
+        }
         
         setState({
           isValid: true,
@@ -114,12 +125,25 @@ export function useLicense() {
     }
   }
 
-  const deactivateLicense = () => {
+  const deactivateLicense = async () => {
     console.log('Deaktiviere Lizenz')
+    
+    // Hole die gespeicherten Daten
+    const licenseKey = localStorage.getItem('license_key')
+    const instanceId = localStorage.getItem('instance_id')
+    
+    // Wenn wir eine instance_id haben, deaktivieren wir sie bei Lemon Squeezy
+    if (licenseKey && instanceId) {
+      await LicenseService.deactivateInstance(licenseKey, instanceId)
+    }
+    
+    // Lösche alle lokalen Daten
     localStorage.removeItem('license_key')
     localStorage.removeItem('is_valid')
     localStorage.removeItem('customer_name')
     localStorage.removeItem('customer_email')
+    localStorage.removeItem('activation_email')
+    localStorage.removeItem('instance_id')
     
     setState({
       isValid: false,

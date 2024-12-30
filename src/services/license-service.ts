@@ -12,6 +12,7 @@ interface LicenseValidateResponse {
     instances?: Array<Instance>
     customer_name?: string
     customer_email?: string
+    instance_id?: string
   }
 }
 
@@ -60,6 +61,10 @@ export class LicenseService {
       
       const formData = new URLSearchParams()
       formData.append('license_key', licenseKey)
+      const instanceId = localStorage.getItem('instance_id')
+      if (instanceId) {
+        formData.append('instance_id', instanceId)
+      }
 
       const response = await fetch(`${LEMON_SQUEEZY_API}/licenses/validate`, {
         method: 'POST',
@@ -113,44 +118,36 @@ export class LicenseService {
         }
       }
 
-      // Prüfe das Aktivierungslimit
-      if (data.license_key.activation_limit && 
-          data.license_key.activation_usage > data.license_key.activation_limit) {
-        return {
-          valid: false,
-          error: 'Das Aktivierungslimit wurde erreicht'
-        }
-      }
-
-      // Prüfe, ob es sich um eine gespeicherte Lizenz handelt
-      const savedKey = localStorage.getItem('license_key')
-      const isStoredLicense = savedKey === licenseKey
-
-      // Wenn es die gespeicherte Lizenz ist, akzeptiere sie auch wenn sie aktiv ist
-      if (isStoredLicense) {
-        return {
-          valid: true,
-          meta: {
-            store_id: data.meta.store_id,
-            product_id: data.meta.product_id,
-            status: data.license_key.status,
-            activation_limit: data.license_key.activation_limit,
-            activation_usage: data.license_key.activation_usage,
-            customer_name: data.meta.customer_name,
-            customer_email: data.meta.customer_email
+      // Prüfe das Aktivierungslimit nur wenn keine instance_id vorhanden ist
+      if (!instanceId && data.license_key.activation_limit && 
+          data.license_key.activation_usage >= data.license_key.activation_limit) {
+        
+        // Prüfe, ob die E-Mail übereinstimmt
+        const storedEmail = localStorage.getItem('activation_email')
+        if (storedEmail === data.meta.customer_email) {
+          // Wenn die E-Mail übereinstimmt, erlauben wir die Aktivierung
+          return {
+            valid: true,
+            meta: {
+              store_id: data.meta.store_id,
+              product_id: data.meta.product_id,
+              status: data.license_key.status,
+              activation_limit: data.license_key.activation_limit,
+              activation_usage: data.license_key.activation_usage,
+              customer_name: data.meta.customer_name,
+              customer_email: data.meta.customer_email,
+              instance_id: data.instance?.id
+            }
           }
         }
-      }
-
-      // Für neue Aktivierungen: Prüfe, ob die Lizenz bereits aktiviert wurde
-      if (data.license_key.status === 'active' && data.license_key.activation_usage > 0) {
+        
         return {
           valid: false,
-          error: 'Diese Lizenz wurde bereits aktiviert'
+          error: `Aktivierungslimit erreicht (${data.license_key.activation_usage}/${data.license_key.activation_limit})`
         }
       }
 
-      // Wenn die Lizenz gültig ist, geben wir sie zurück
+      // Wenn es eine bekannte Instanz ist oder die Lizenz noch nicht aktiviert wurde
       return {
         valid: true,
         meta: {
@@ -160,7 +157,8 @@ export class LicenseService {
           activation_limit: data.license_key.activation_limit,
           activation_usage: data.license_key.activation_usage,
           customer_name: data.meta.customer_name,
-          customer_email: data.meta.customer_email
+          customer_email: data.meta.customer_email,
+          instance_id: data.instance?.id
         }
       }
     } catch (err) {
@@ -172,19 +170,37 @@ export class LicenseService {
     }
   }
 
+  static async deactivateInstance(licenseKey: string, instanceId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${LEMON_SQUEEZY_API}/licenses/deactivate`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${import.meta.env.VITE_LEMON_SQUEEZY_API_KEY}`
+        },
+        body: new URLSearchParams({
+          license_key: licenseKey,
+          instance_id: instanceId
+        })
+      })
+
+      console.log('Deactivate Response Status:', response.status)
+      const data = await response.json()
+      console.log('Deactivate Response Data:', data)
+
+      return response.ok && !data.error
+    } catch (err) {
+      console.error('Deaktivierungsfehler:', err)
+      return false
+    }
+  }
+
   static async activateLicense(licenseKey: string): Promise<LicenseValidateResponse> {
     try {
       // Erst validieren
       const validationResult = await this.validateLicense(licenseKey)
       if (!validationResult.valid) {
-        return validationResult
-      }
-
-      // Wenn die Lizenz bereits aktiv ist, speichern und zurückgeben
-      if (validationResult.meta?.status === 'active') {
-        localStorage.setItem('license_key', licenseKey)
-        localStorage.setItem('customer_name', validationResult.meta.customer_name || '')
-        localStorage.setItem('customer_email', validationResult.meta.customer_email || '')
         return validationResult
       }
 
@@ -216,7 +232,10 @@ export class LicenseService {
         }
       }
 
-      // Speichere die erfolgreiche Aktivierung
+      // Speichere die instance_id und andere Daten
+      if (data.instance?.id) {
+        localStorage.setItem('instance_id', data.instance.id)
+      }
       localStorage.setItem('license_key', licenseKey)
       localStorage.setItem('customer_name', data.meta.customer_name)
       localStorage.setItem('customer_email', data.meta.customer_email)
@@ -230,7 +249,8 @@ export class LicenseService {
           activation_limit: data.license_key.activation_limit,
           activation_usage: data.license_key.activation_usage,
           customer_name: data.meta.customer_name,
-          customer_email: data.meta.customer_email
+          customer_email: data.meta.customer_email,
+          instance_id: data.instance?.id
         }
       }
     } catch (err) {
