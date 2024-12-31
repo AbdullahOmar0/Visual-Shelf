@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
-import { PersonIcon, GlobeIcon, QuestionMarkCircledIcon, ExitIcon, SunIcon } from '@radix-ui/react-icons'
+import { PersonIcon, GlobeIcon, QuestionMarkCircledIcon, ExitIcon, SunIcon, ArrowLeftIcon } from '@radix-ui/react-icons'
 import { useLicense } from '../hooks/use-license'
 import ReactConfetti from 'react-confetti'
 
@@ -198,8 +198,18 @@ export function UserMenu() {
               leaveTo="translate-x-full"
             >
               <Dialog.Panel className="w-full h-full bg-white px-8">
+                {/* Back Button */}
+                <div className=" h-fit w-fit px-4 cursor-pointer pt-4 hover:px-0 transition-all duration-300">
+                  <a
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 text-black hover:text-gray-900 transition-all duration-300 "
+                  >
+                    <ArrowLeftIcon className="w-4 h-4" />
+                    <span className="text-sm font-medium">back</span>
+                  </a>
+                </div>
                 {isValid && (
-                  <div className="flex flex-col items-center py-8 px-4 border-b border-gray-100">
+                  <div className="flex flex-col items-center  px-4 border-b border-gray-100 ">
                     <div className="w-20 h-20 mb-4">
                       <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-semibold">
                         {customerName.charAt(0).toUpperCase()}
@@ -213,23 +223,25 @@ export function UserMenu() {
                 )}  
                 {/* banner*/}
                 {!isValid && (
-                  <div className="py-4 px-4 h-fit">
-                    <div className=" h-[190px] rounded-2xl bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 p-6 text-white flex flex-row items-center justify-between">
-                      <div className="flex flex-col">
-                     <h3 className="text-2xl font-light mb-2">Unlock access to whole</h3>
-                      <p className="text-3xl text-white font-bold mb-4">Assets library</p>
-                      </div>
-                      <div className="flex flex-col items-center justify-between gap-4">
-                        <span className="text-5xl text-white font-bold">$20</span>  
-                        <a 
-                          
-                          className="bg-white text-black px-4 py-3 h-fit rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors"
-                        >
-                          Access For Lifetime
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+                   <div className="py-4 px-4 h-fit">
+                   <div className="h-[170px] rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 p-6 text-white flex flex-row items-center justify-between">
+                     <div className="flex flex-col">
+                       <h3 className="text-2xl font-light mb-2">You only pay once &</h3>
+                       <p className="text-3xl text-white font-bold mb-4"> it's forever yours</p>
+                     </div>
+                     <div className="flex flex-col items-center justify-between gap-4">
+                       <span className="text-5xl text-white font-bold">$20</span>
+                       <button 
+                         onClick={() => {
+                           console.log('Upgrade clicked')
+                         }}
+                         className="bg-gradient-to-t from-[#E9E9E9] to-white text-black px-4 py-3 h-fit rounded-lg font-medium text-sm shadow-md"
+                       >
+                         Access For Lifetime
+                       </button>
+                     </div>
+                   </div>
+                 </div>
                 )}
                 {/* Menu Items */}
                 <div className="px-4 py-2 space-y-2 ">
