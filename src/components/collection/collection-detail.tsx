@@ -58,7 +58,7 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
   const getButtonText = () => {
     if (isInserting) return 'Inserting...'
     if (selectedAsset?.is_premium && !hasValidLicense) {
-      return '⭐️ Upgrade to Premium'
+      return 'Upgrade to Premium '
     }
     return 'Insert Motif'
   }
@@ -68,9 +68,9 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
       return 'opacity-50 cursor-not-allowed bg-black'
     }
     if (selectedAsset?.is_premium && !hasValidLicense) {
-      return 'bg-yellow-500 hover:bg-yellow-600 text-black font-semibold'
+      return 'text-white bg-gradient-to-t from-[#0063FF] to-[#4E93FF] text-black font-semibold'
     }
-    return 'bg-black hover:bg-gray-700 text-white'
+    return 'bg-gradient-to-t from-[#000000] to-[#414141] hover:bg-gray-700 text-white'
   }
 
   // Vorschaubilder werden als Base64 Data URLs gespeichert
@@ -204,7 +204,7 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
               href="https://visualshelf.framer.website/pricing"
               target="_blank"
               rel="noopener noreferrer"
-              className={`w-full h-fit py-3 px-4 rounded-lg transition-all text-center block
+              className={`w-full h-fit py-3 px-4 rounded-lg transition-all text-center block text-base
                 ${getButtonStyle()}
                 font-medium
               `}
@@ -216,7 +216,7 @@ export function CollectionDetail({ collection, onInsert, onBack }: CollectionDet
             <button 
               onClick={handleInsert}
               disabled={isInserting}
-              className={`w-full h-fit py-3 px-4 rounded-lg transition-all 
+              className={`w-full h-fit py-3 px-4 rounded-lg transition-all text-base
                 ${getButtonStyle()}
                 font-medium
               `}
