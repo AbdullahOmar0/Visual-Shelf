@@ -1,6 +1,7 @@
 import { NavProps } from '../../types/ui.types'
 import { useCategories } from '../../hooks/useCategories'
 import { UserMenu } from '../user-menu'
+import { PrimeDialog } from '../prime-dialog'
 
 export function Nav({ activeCategory, onCategorySelect }: NavProps) {
   const { data: categories, isLoading } = useCategories()
@@ -55,7 +56,10 @@ export function Nav({ activeCategory, onCategorySelect }: NavProps) {
           ))}
         </nav>
         
-        <UserMenu />
+        <div className="flex items-center gap-4">
+          <PrimeDialog />
+          <UserMenu />
+        </div>
       </div>
     </header>
   )
