@@ -20,11 +20,11 @@ export function Banner({ onExplore }: BannerProps) {
         </h1>
         <button 
           onClick={onExplore}
-          className="w-fit h-fit self-start mt-8 bg-gradient-to-br from-white to-[#fafafa] text-[#111111] rounded-md px-4 py-1.5 text-sm shadow-md hover:opacity-90 transition-opacity"
+          className="w-fit h-fit self-start mt-8 bg-gradient-to-t from-[#E9E9E9] to-white text-black rounded-md px-6 py-2 text-sm shadow-md hover:opacity-90 transition-opacity"
         >
           explore now
         </button>
       </div>
     </div>
   )
-}
+} 
